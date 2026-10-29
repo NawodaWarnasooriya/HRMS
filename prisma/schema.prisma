@@ -1,0 +1,100 @@
+generator client {
+provider = "prisma-client-js"
+}
+
+datasource db {
+provider = "postgresql"
+url      = env("DATABASE_URL")
+}
+
+model Department {
+id        Int        @id @default(autoincrement())
+name      String     @unique
+employees Employee[]
+users     User[]
+createdAt DateTime   @default(now())
+updatedAt DateTime   @updatedAt
+}
+
+model Employee {
+id                 Int          @id @default(autoincrement())
+employeeCode       String       @unique
+name               String
+email              String       @unique
+phone              String?
+position           String
+status             String       @default("ACTIVE")
+departmentId       Int
+designationId      Int?
+reportingManagerId Int?
+
+department         Department   @relation(fields: [departmentId], references: [id])
+designation        Designation? @relation(fields: [designationId], references: [id])
+
+reportingManager   Employee?    @relation("EmployeeReportingManager", fields: [reportingManagerId], references: [id])
+subordinates       Employee[]   @relation("EmployeeReportingManager")
+
+createdAt          DateTime     @default(now())
+updatedAt          DateTime     @updatedAt
+}
+
+
+model User {
+  id               Int         @id @default(autoincrement())
+  name             String
+  email            String      @unique
+  password         String
+  role             String      @default("EMPLOYEE")
+  status           String      @default("ACTIVE")
+  departmentId     Int?
+  department       Department? @relation(fields: [departmentId], references: [id])
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+}
+
+
+
+model Role {
+id          Int          @id @default(autoincrement())
+name        String       @unique
+description String?
+status      String       @default("ACTIVE")
+permissions Permission[]
+createdAt   DateTime     @default(now())
+updatedAt   DateTime     @updatedAt
+}
+
+
+model Permission {
+id          Int      @id @default(autoincrement())
+name        String   @unique
+description String?
+status      String   @default("ACTIVE")
+roles       Role[]
+createdAt   DateTime @default(now())
+updatedAt   DateTime @updatedAt
+}
+
+
+model Designation {
+id          Int        @id @default(autoincrement())
+name        String     @unique
+description String?
+status      String     @default("ACTIVE")
+employees   Employee[]
+createdAt   DateTime   @default(now())
+updatedAt   DateTime   @updatedAt
+}
+
+
+model Branch {
+id        Int      @id @default(autoincrement())
+name      String   @unique
+address   String?
+phone     String?
+status    String   @default("ACTIVE")
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+}
